@@ -168,32 +168,43 @@ $(document).ready(function () {
 
   $('#attack-button').on('click.attack', function () {
     console.log('attack clicked')
-    attack()
+    // increment attackCounter (for power scaling of player attacks)
+    gameState.numAttacks++
+
+    // attack and defend stages
+    attack(gameState.numAttacks)
     defend()
 
+    // display updated values for character health
     $('#selected-character .character-health').text(gameState.selectedCharacter.health)
     $('#defender .character-health').text(gameState.selectedDefender.health)
+
     // logic to check if defender or players are dead.
     if (isCharacterDead(gameState.selectedCharacter)) {
       // you lose!
-      console.log('you lose')
+      alert('You were defeated by ' + gameState.selectedDefender.name + '. Click reset to play again.')
       // display lose message to user, and present reset button.
       $('#selected-character').empty()
-      $('#attack-button').hide()
+      $(this).hide()
       $('#reset-button').show()
     } else if (isCharacterDead(gameState.selectedDefender)) {
       console.log('defender dead')
-      // decrement enemiesLeft counter;
+
+      // decrement enemiesLeft counter and empty defender div
       gameState.enemiesLeft--
-      $('#attack-button').hide()
       $('#defender').empty()
+
+      // hide attack button, because user needs to select new enemy before attacking again
+      $(this).hide()
+
+      // checks if you win the game, or if there are more characters to fight
       if (isGameWon()) {
-        console.log('you win!')
-        // Hide attack button, display reset button and any reset messages.
+        // show reset button and alert
+        alert('You win! Click Reset to play again')
         $('#reset-button').show()
       } else {
-        console.log('there are still enemies left, select another')
-        $('#defender').empty()
+        // Prompt user to select another enemy
+        alert('You defeated ' + gameState.selectedDefender.name + '! Select another enemy to fight.')
         enableEnemySelection()
       }
     }
@@ -201,23 +212,25 @@ $(document).ready(function () {
 
   $('#reset-button').on('click.reset', function () {
     console.log('resetting game')
-    // empty out other content areas
+
+    // empty out all content areas
     $('#selected-character').empty()
     $('#defender').empty()
     $('#available-to-attack-section .enemy').empty()
     $('#character-area').empty()
     $('#characters-section').show()
+
+    // hide reset button
+    $(this).hide()
+
+    // start the game again
     startGame()
-    // hide any reset messages that may be displayed.
-    $('#reset-button').hide()
   })
 
-  function attack () {
+  function attack (numAttacks) {
     console.log('attacking defender')
-    // increment numAttacks counter
-    gameState.numAttacks++
     // The opponent will lose `HP` (health points).
-    gameState.selectedDefender.health -= gameState.selectedCharacter.attack * gameState.numAttacks
+    gameState.selectedDefender.health -= gameState.selectedCharacter.attack * numAttacks
   }
 
   //  HOMEWORK INSTRUCTIONS: The opponent character will instantly counter the attack.

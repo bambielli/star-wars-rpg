@@ -5,9 +5,11 @@ $(document).ready(function () {
 
   // Creating an object to hold our characters.
   var characters, gameState
-  console.log('starting game')
+
   /* RESET FUNCTIONS */
 
+  // startGame acts as primary reset function. it is called at the bottom of the file
+  // to kick the game off.
   function startGame () {
     // resets the game to original state;
     characters = resetCharacters()
@@ -62,6 +64,18 @@ $(document).ready(function () {
   }
 
   /* RENDERING */
+
+  // helpful for creating dynamic divs
+  function createCharDiv (character, key) {
+    var charDiv = $("<div class='character' data-name='" + key + "'>")
+    var charName = $("<div class='character-name'>").text(character.name)
+    var charImage = $("<img alt='image' class='character-image'>").attr('src', character.imageUrl)
+    var charHealth = $("<div class='character-health'>").text(character.health)
+    charDiv.append(charName).append(charImage).append(charHealth)
+    return charDiv
+  }
+
+  // renders all characters in character-section to start
   function renderCharacters () {
     console.log('rendering characters')
     // iterate through characters object,
@@ -74,19 +88,11 @@ $(document).ready(function () {
       // append elements to the body
       // need to add a data attribute to make sure we can back-reference.
       var charDiv = createCharDiv(character, characterKey)
-      $('#characters-section').append(charDiv)
+      $('#character-area').append(charDiv)
     }
   }
 
-  function createCharDiv (character, key) {
-    var charDiv = $("<div class='character' data-name='" + key + "'>")
-    var charName = $("<div class='character-name'>").text(character.name)
-    var charImage = $("<img alt='image' class='character-image'>").attr('src', character.imageUrl)
-    var charHealth = $("<div class='character-health'>").text(character.health)
-    charDiv.append(charName).append(charImage).append(charHealth)
-    return charDiv
-  }
-
+  // renders just the opponents (not the character that was just selected)
   function renderOpponents (selectedCharacterKey) {
     // iterate through oponents object, and render
     // oponent divs for every key that is NOT the selectedCharacter
@@ -115,7 +121,7 @@ $(document).ready(function () {
   // that will still trigger for dynamically added elements. The selector in
   // the $ needs to be present when the event is attached in order for event
   // delegation to work.
-  $('#characters-section').on('click', '.character', function () {
+  $('#character-area').on('click', '.character', function () {
     // store selected character in javascript
 
     var selectedKey = $(this).attr('data-name')
@@ -164,16 +170,16 @@ $(document).ready(function () {
     console.log('attack clicked')
     attack()
     defend()
-    console.log('player stats are: ', gameState.selectedCharacter)
-    console.log('defender stats are: ', gameState.selectedDefender)
+
     $('#selected-character .character-health').text(gameState.selectedCharacter.health)
     $('#defender .character-health').text(gameState.selectedDefender.health)
     // logic to check if defender or players are dead.
     if (isCharacterDead(gameState.selectedCharacter)) {
       // you lose!
       console.log('you lose')
-      $('#selected-character').empty()
       // display lose message to user, and present reset button.
+      $('#selected-character').empty()
+      $('#attack-button').hide()
       $('#reset-button').show()
     } else if (isCharacterDead(gameState.selectedDefender)) {
       console.log('defender dead')
@@ -199,7 +205,8 @@ $(document).ready(function () {
     $('#selected-character').empty()
     $('#defender').empty()
     $('#available-to-attack-section .enemy').empty()
-    $('#characters-section').empty().show()
+    $('#character-area').empty()
+    $('#characters-section').show()
     startGame()
     // hide any reset messages that may be displayed.
     $('#reset-button').hide()

@@ -1,4 +1,4 @@
-# [Star-Wars RPG](http://www.bambielli.com/week-4-homework/)
+# [Star-Wars RPG](http://www.bambielli.com/star-wars-rpg/)
 Prep for "live coding" session to happen later this week at the bootcamp.
 This was week4 homework for students.
 

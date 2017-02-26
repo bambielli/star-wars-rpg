@@ -35,20 +35,46 @@ $(document).ready(function () {
     }
   }
 
+  var selectedCharacter
+  var selectedEnemy
+  var enemiesLeft = []
+
   // render to screen
+  function renderCharacters () {
+    var keys = Object.keys(characters)
+    for (var i = 0; i < keys; i++) {
+      // get the current character out of the object
+      var currentObj = characters[keys[i]]
+      // append elements to the body so it looks ok.
+      // need to add a data attribute to make sure we can back-reference.
+    }
+  }
+
+  //* ******click handlers*********//
 
   /*
    * When the game starts, the player will choose a character
      by clicking on the fighter's picture.
      The player will fight as that character for the rest of the game.
   */
-  var selectedCharacter
-
   $().on('click', function () {
-    console.log(this)
     selectedCharacter = this.attr('data-name')
     console.log('player selected')
+    /*
+      Enemies should be moved to a different area of the screen.
+    */
   })
 
-  //
+  /*
+  *
+    The player chooses an opponent by clicking on an enemy's picture.
+  */
+  $().on('click', function () {
+    console.log('enemy clicked')
+    selectedEnemy = this.attr('data-name')
+    /*
+    * Once the player selects an opponent,
+      that enemy is moved to a `defender area`.
+    */
+  })
 })

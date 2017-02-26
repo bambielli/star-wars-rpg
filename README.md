@@ -22,3 +22,5 @@ $('#element-in-dom').on('click', 'selector-for-dynamic-element', function(){
 
 6) I left a lot of comments and console.log statements on purpose, to help better explain my design decisions / thoughts.
 
+7) Students should not only deploy their static sites to heroku, but should also deploy to github pages!
+

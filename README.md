@@ -16,3 +16,5 @@ $('#element-in-dom').on('click', 'selector-for-dynamic-element', function(){
 3) I don't like how much DOM manipulation I'm doing.
 
 4) Testing this would be an absolute nightmare.
+
+5) I left a lot of comments and console.log statements on purpose, to help better explain my thoughts.

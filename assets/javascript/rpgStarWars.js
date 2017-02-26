@@ -4,15 +4,17 @@ $(document).ready(function () {
   // ===================================================================
 
   // Creating an object to hold our characters.
-  var characters = resetCharacters()
-
-  var gameState = resetGameState()
-
+  var characters, gameState
+  console.log('starting game')
   /* RESET FUNCTIONS */
-  function reset () {
+
+  function startGame () {
     // resets the game to original state;
     characters = resetCharacters()
     gameState = resetGameState()
+
+    // renders characters
+    renderCharacters()
   }
 
   function resetCharacters () {
@@ -54,33 +56,50 @@ $(document).ready(function () {
     return {
       selectedCharacter: null,
       selectedDefender: null,
-      enemiesLeft: [],
+      enemiesLeft: 0,
       numAttacks: 0
     }
   }
 
   /* RENDERING */
-  function renderCharacterSelect () {
+  function renderCharacters () {
+    console.log('rendering characters')
     // iterate through characters object,
     // render each character to the charactersSelect div
     var keys = Object.keys(characters)
-    for (var i = 0; i < keys; i++) {
+    for (var i = 0; i < keys.length; i++) {
       // get the current character out of the object
-      var currentObj = characters[keys[i]]
-      // append elements to the body so it looks ok.
+      var characterKey = keys[i]
+      var character = characters[characterKey]
+      // append elements to the body
       // need to add a data attribute to make sure we can back-reference.
+      var charDiv = createCharDiv(character, characterKey)
+      $('#characters-section').append(charDiv)
     }
   }
 
-  function renderOpponents () {
-    // iterate through opponents array
-    // render each opponent to the opponentsSelect div.
-    // this function will be called after the player is selected, and
-    // will be data driven based on the enemiesLeft.
-    for (var i = 0; i < gameState.enemiesLeft.length; i++) {
-      var enemyKey = gameState.enemiesLeft[i]
-      var enemyData = characters[enemyKey]
-      // use enemyData to append to dom.
+  function createCharDiv (character, key) {
+    var charDiv = $("<div class='character' data-name='" + key + "'>")
+    var charName = $("<div class='character-name'>").text(character.name)
+    var charImage = $("<img alt='image' class='character-image'>").attr('src', character.imageUrl)
+    var charHealth = $("<div class='character-health'>").text(character.health)
+    charDiv.append(charName).append(charImage).append(charHealth)
+    return charDiv
+  }
+
+  function renderOpponents (selectedCharacterKey) {
+    // iterate through oponents object, and render
+    // oponent divs for every key that is NOT the selectedCharacter
+    var characterKeys = Object.keys(characters)
+    for (var i = 0; i < characterKeys.length; i++) {
+      if (characterKeys[i] !== selectedCharacterKey) {
+        var enemyKey = characterKeys[i]
+        var enemy = characters[enemyKey]
+
+        var enemyDiv = createCharDiv(enemy, enemyKey)
+        $(enemyDiv).addClass('enemy')
+        $('#available-to-attack-section').append(enemyDiv)
+      }
     }
   }
 
@@ -92,23 +111,30 @@ $(document).ready(function () {
      The player will fight as that character for the rest of the game.
   */
 
-  $().on('click.playerSelect', function () {
+  // NOTE: the second argument to the on method means this is a "delegated event"
+  // that will still trigger for dynamically added elements. The selector in
+  // the $ needs to be present when the event is attached in order for event
+  // delegation to work.
+  $('#characters-section').on('click', '.character', function () {
     // store selected character in javascript
-    gameState.selectedCharacter = this.attr('data-name')
+
+    var selectedKey = $(this).attr('data-name')
+    gameState.selectedCharacter = characters[selectedKey]
     console.log('player selected')
+
+    // move to selected section
+    $('#selected-character').append(this)
+
     /*
       HOMEWORK INSTRUCTIONS: Enemies should be moved to a different area of the screen.
     */
-    // to do this, add all characters that are NOT the currently selectedCharacter
-    // to the "enemiesLeft" list in gameState.
-    var keys = Object.keys(characters)
-    for (var i = 0; i < keys.length; i++) {
-      if (keys[i] !== this.attr('data-name')) {
-        gameState.enemiesLeft.push(keys[i])
-      }
-    }
+
+    $('#characters-section').hide()
     // then call renderOpponents and enable enemySelection:
-    renderOpponents()
+    renderOpponents(selectedKey)
+
+    // set the number of enemies, and enable enemy selection;
+    gameState.enemiesLeft = Object.keys(characters).length - 1
     enableEnemySelection()
   })
 
@@ -117,54 +143,66 @@ $(document).ready(function () {
     HOMEWORK INSTRUCTIONS: The player chooses an opponent by clicking on an enemy's picture.
   */
   function enableEnemySelection () {
-    // using .one because I only want this to happen one time.
-    // player should not be able to select multiple enemies.
-    $().one('click.enemySelect', function () {
+    $('.enemy').on('click.enemySelect', function () {
       console.log('opponent selected')
-      gameState.selectedDefender = this.attr('data-name')
+      var opponentKey = $(this).attr('data-name')
+      gameState.selectedDefender = characters[opponentKey]
+
+      // move enemy
+      $('#defender').append(this)
     /*
     * HOMEWORK INSTRUCTIONS: Once the player selects an opponent,
       that enemy is moved to a `defender area`.
-       The player will now be able to click the `attack` button (show attack button)
+       The player will now be able to click the `attack` button
     */
+      $('#attack-button').show()
+      $('.enemy').off('click.enemySelect')
     })
   }
 
-  $().on('click.attack', function () {
+  $('#attack-button').on('click.attack', function () {
     console.log('attack clicked')
     attack()
     defend()
     console.log('player stats are: ', gameState.selectedCharacter)
     console.log('defender stats are: ', gameState.selectedDefender)
-
+    $('#selected-character .character-health').text(gameState.selectedCharacter.health)
+    $('#defender .character-health').text(gameState.selectedDefender.health)
     // logic to check if defender or players are dead.
     if (isCharacterDead(gameState.selectedCharacter)) {
       // you lose!
       console.log('you lose')
+      $('#selected-character').empty()
       // display lose message to user, and present reset button.
+      $('#reset-button').show()
     } else if (isCharacterDead(gameState.selectedDefender)) {
       console.log('defender dead')
-      // remove defender from enemiesList;
-      var indexToRemove = enemiesList.indexOf()
-      gameState.enemiesList.splice(indexToRemove, 1)
-
+      // decrement enemiesLeft counter;
+      gameState.enemiesLeft--
+      $('#attack-button').hide()
+      $('#defender').empty()
       if (isGameWon()) {
         console.log('you win!')
-        // display reset button and any reset messages.
+        // Hide attack button, display reset button and any reset messages.
+        $('#reset-button').show()
       } else {
         console.log('there are still enemies left, select another')
+        $('#defender').empty()
         enableEnemySelection()
       }
-    } else {
-      // display stats to user
-      // something like "you hit for 123" and defender countered with "234"
     }
   })
 
-  $().on('click.reset', function () {
+  $('#reset-button').on('click.reset', function () {
     console.log('resetting game')
-    reset()
+    // empty out other content areas
+    $('#selected-character').empty()
+    $('#defender').empty()
+    $('#available-to-attack-section .enemy').empty()
+    $('#characters-section').empty().show()
+    startGame()
     // hide any reset messages that may be displayed.
+    $('#reset-button').hide()
   })
 
   function attack () {
@@ -173,7 +211,6 @@ $(document).ready(function () {
     gameState.numAttacks++
     // The opponent will lose `HP` (health points).
     gameState.selectedDefender.health -= gameState.selectedCharacter.attack * gameState.numAttacks
-    // These points are displayed at the bottom of the defender's picture.
   }
 
   //  HOMEWORK INSTRUCTIONS: The opponent character will instantly counter the attack.
@@ -181,7 +218,6 @@ $(document).ready(function () {
     console.log('defender countering')
     // HOMEWORK INSTRUCTIONS: the selectedCharacter will lose HP
     gameState.selectedCharacter.health -= gameState.selectedDefender.enemyAttackBack
-    // HOMEWORK INSTRUCTIONS:These points are shown at the bottom of the player character's picture.
   }
 
   // returns boolean if the passed character is dead
@@ -193,6 +229,8 @@ $(document).ready(function () {
   // checks if you won
   function isGameWon () {
     console.log('checking if you won the game')
-    return gameState.enemiesLeft.length === 0
+    return gameState.enemiesLeft === 0
   }
+
+  startGame()
 })

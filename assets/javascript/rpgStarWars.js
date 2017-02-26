@@ -179,46 +179,17 @@ $(document).ready(function () {
     $('#selected-character .character-health').text(gameState.selectedCharacter.health)
     $('#defender .character-health').text(gameState.selectedDefender.health)
 
-    // logic to check if defender or players are dead.
-    if (isCharacterDead(gameState.selectedCharacter)) {
-      // you lose!
-      alert('You were defeated by ' + gameState.selectedDefender.name + '. Click reset to play again.')
-      // display lose message to user, and present reset button.
-      $('#selected-character').empty()
+    // hide the attack button if attack phase is over
+    if (isAttackPhaseComplete()) {
       $(this).hide()
-      $('#reset-button').show()
-    } else if (isCharacterDead(gameState.selectedDefender)) {
-      console.log('defender dead')
-
-      // decrement enemiesLeft counter and empty defender div
-      gameState.enemiesLeft--
-      $('#defender').empty()
-
-      // hide attack button, because user needs to select new enemy before attacking again
-      $(this).hide()
-
-      // checks if you win the game, or if there are more characters to fight
-      if (isGameWon()) {
-        // show reset button and alert
-        alert('You win! Click Reset to play again')
-        $('#reset-button').show()
-      } else {
-        // Prompt user to select another enemy
-        alert('You defeated ' + gameState.selectedDefender.name + '! Select another enemy to fight.')
-        enableEnemySelection()
-      }
     }
   })
 
   $('#reset-button').on('click.reset', function () {
     console.log('resetting game')
 
-    // empty out all content areas
-    $('#selected-character').empty()
-    $('#defender').empty()
-    $('#available-to-attack-section .enemy').empty()
-    $('#character-area').empty()
-    $('#characters-section').show()
+    // empty all divs before resetting the game
+    emptyDivs()
 
     // hide reset button
     $(this).hide()
@@ -250,6 +221,49 @@ $(document).ready(function () {
   function isGameWon () {
     console.log('checking if you won the game')
     return gameState.enemiesLeft === 0
+  }
+
+  // this function returns a boolean, indicating that the attack phase has been completed
+  function isAttackPhaseComplete () {
+    // logic to check if defender or players are dead.
+    if (isCharacterDead(gameState.selectedCharacter)) {
+      // you lose!
+      alert('You were defeated by ' + gameState.selectedDefender.name + '. Click reset to play again.')
+      // display lose message to user, and present reset button.
+      $('#selected-character').empty()
+      $('#reset-button').show()
+
+      return true // returning true because attack phase has completed.
+    } else if (isCharacterDead(gameState.selectedDefender)) {
+      console.log('defender dead')
+
+      // decrement enemiesLeft counter and empty defender div
+      gameState.enemiesLeft--
+      $('#defender').empty()
+
+      // checks if you win the game, or if there are more characters to fight
+      if (isGameWon()) {
+        // show reset button and alert
+        alert('You win! Click Reset to play again')
+        $('#reset-button').show()
+      } else {
+        // Prompt user to select another enemy
+        alert('You defeated ' + gameState.selectedDefender.name + '! Select another enemy to fight.')
+        enableEnemySelection()
+      }
+      return true // returning true because attack phase has completed.
+    }
+    // returning false, because attack phase is not complete.
+    return false
+  }
+
+  function emptyDivs () {
+    // empty out all content areas
+    $('#selected-character').empty()
+    $('#defender').empty()
+    $('#available-to-attack-section .enemy').empty()
+    $('#character-area').empty()
+    $('#characters-section').show()
   }
 
   startGame()

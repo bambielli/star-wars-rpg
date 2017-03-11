@@ -116,11 +116,11 @@ function enableEnemySelection () {
 
     // move enemy
     $('#defender').append(this)
-  /*
-  * HOMEWORK INSTRUCTIONS: Once the player selects an opponent,
-    that enemy is moved to a `defender area`.
-     The player will now be able to click the `attack` button
-  */
+    /*
+    * HOMEWORK INSTRUCTIONS: Once the player selects an opponent,
+      that enemy is moved to a `defender area`.
+       The player will now be able to click the `attack` button
+    */
     $('#attack-button').show()
     $('.enemy').off('click.enemySelect')
   })
@@ -138,6 +138,11 @@ function defend () {
   // HOMEWORK INSTRUCTIONS: the selectedCharacter will lose HP
   gameState.selectedCharacter.health -= gameState.selectedDefender.enemyAttackBack
 }
+
+// Design Note: I like naming functions that return a boolean after the question
+// that they answer... like "isCharacterDead" instead of "CharacterDead". That way
+// it feels more like the boolean returned is answering a question for me!
+// ^make sure if you do this, that your boolean returns true / false in the correct situations
 
 // returns boolean if the passed character is dead
 function isCharacterDead (character) {
